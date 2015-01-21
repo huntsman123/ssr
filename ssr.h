@@ -23,6 +23,10 @@ namespace ssr {
     if (sigil < 1 || input < 1) return false; // End of input or regex
 
     if (sigil == ANY_CHAR) return true;
+    if (sigil == ANY_WHITESPACE) {
+      if (input == ' ' || input == '\t') return true;
+      else return false;
+    }
 
     return false;
   }
@@ -51,13 +55,19 @@ namespace ssr {
         case '.':
           current_sigil = ANY_CHAR;
           break;
+        case '\\':
+          // Process escape codes
+          if (*lookahead == 'w') current_sigil = ANY_WHITESPACE;
+          advance_r();
+          break;
         default:
           current_sigil = *current_r;
       }
 
       if (*lookahead == '*') {
-        while (sigil_match(current_sigil, *current_i))
+        while (sigil_match(current_sigil, *current_i)) {
           advance_i();
+        }
         advance_r(2); // Next sigil
       }
       else if (sigil_match(current_sigil, *current_i)) {
@@ -73,10 +83,10 @@ namespace ssr {
       // If the string is consumed but the regex isn't, then back it up.
       // If you back it all the to the beginning and there is still no match,
       // then it's not a match.
-      if (current_i >= input.end()) {
-        if (current_r > regex.begin()) advance_r(-1);
-        if (current_r <= regex.begin()) return false;
-      }
+      // if (current_i >= input.end()) {
+      //   if (current_r > regex.begin()) advance_i(-1);
+      //   if (current_r <= regex.begin()) return false;
+      // }
     }
 
     return false;
