@@ -1,95 +1,106 @@
 #include <string>
+#include <vector>
+#include <queue>
 #include <iostream>
 
 namespace ssr {
   enum {
-    ANY_CHAR = 256,
-    ANY_WHITESPACE,
-    ANY_NON_WHITESPACE,
-    ANY_DIGIT,
-    ANY_NON_DIGIT,
-    ANY_WORD_CHAR,
-    ANY_NON_WORD_CHAR
+    CHAR,
+    ANY_CHAR,
+    SPLIT,
+    JUMP
   };
 
-  bool sigil_match(unsigned int sigil, unsigned char input) {
+  struct Thread {
+    unsigned int pp;
+    unsigned int sp;
+  };
 
-    // If sigil is a regular char
-    if (sigil < 256) {
-      if (sigil == input) return true;
-      else return false;
-    }
+  class Regex {
+    std::vector<unsigned int> code; // Where the bytecode is stored
+    std::queue<Thread> threads;    // Keep track of the threads to run
 
-    if (sigil < 1 || input < 1) return false; // End of input or regex
-
-    if (sigil == ANY_CHAR) return true;
-    if (sigil == ANY_WHITESPACE) {
-      if (input == ' ' || input == '\t') return true;
-      else return false;
-    }
-
-    return false;
-  }
-  
-  bool match(std::string regex, std::string input) {
-  
-    auto current_r = regex.begin(), // The current character in the regex to match
-    lookahead = ++regex.begin(),    // The next character in the regex after the current
-    current_i = input.begin();      // The current character to match in the input string
-
-    // Advance the regex counters
-    auto advance_r = [&] (int step = 1) {
-      current_r += step;
-      lookahead += step;
-    };
-
-    // Advance the input counter
-    auto advance_i = [&] (int step = 1) {
-      current_i += step;
-    };
-
-    while (true) {
-
-      unsigned int current_sigil;
-      switch (*current_r) {
-        case '.':
-          current_sigil = ANY_CHAR;
-          break;
-        case '\\':
-          // Process escape codes
-          if (*lookahead == 'w') current_sigil = ANY_WHITESPACE;
-          advance_r();
-          break;
-        default:
-          current_sigil = *current_r;
-      }
-
-      if (*lookahead == '*') {
-        while (sigil_match(current_sigil, *current_i)) {
-          advance_i();
-        }
-        advance_r(2); // Next sigil
-      }
-      else if (sigil_match(current_sigil, *current_i)) {
-        advance_r();
-        advance_i();
-      }
-      else
-        return false;
+    public:
     
-      // If both are consumed, it's a match
-      if (current_r >= regex.end() && current_i >= input.end()) return true;
+    Regex(std::string regex) {
+      unsigned int counter = 0;
+      unsigned int last_instruction = 0;
 
-      // If the string is consumed but the regex isn't, then back it up.
-      // If you back it all the to the beginning and there is still no match,
-      // then it's not a match.
-      // if (current_i >= input.end()) {
-      //   if (current_r > regex.begin()) advance_i(-1);
-      //   if (current_r <= regex.begin()) return false;
-      // }
+      while (counter < regex.size()) {
+        if (regex[counter] == '.') {
+          code.push_back(ANY_CHAR);
+          last_instruction = code.size() - 1;
+        }
+        else if (regex[counter] == '+') {
+          code.push_back(SPLIT);
+          code.push_back(last_instruction);
+          last_instruction = code.size() - 3;
+        }
+        else if (regex[counter] == '*') {
+          code.insert(code.begin() + last_instruction, SPLIT);
+          code.insert(code.begin() + last_instruction + 1, code.size() + 3);
+          code.push_back(JUMP);
+          code.push_back(last_instruction);
+          last_instruction = code.size() - 2;
+        }
+        else {
+          code.push_back(CHAR);
+          code.push_back(regex[counter]);
+          last_instruction = code.size() - 2;
+        }
+        counter++;
+      }
+
+      // for (auto n : code) std::cout << n << " ";
+      // std::cout << std::endl;
     }
 
-    return false;
-  }
+    bool match(std::string str) {
+      unsigned int sp = 0,
+                   pp = 0;
+      threads.push(Thread{pp,sp});
 
+      // Loop through each thread to find a match
+loop_break: // Ugh, I know
+      while (threads.size() > 0) {
+        sp = threads.front().sp;
+        pp = threads.front().pp;
+        threads.pop();
+
+        // While there are characters to test
+        while (pp < code.size() && sp <= str.size()) {
+          switch(code[pp]) {
+            case CHAR:
+              pp++;
+              if (code[pp] == str[sp]) {
+                pp++;
+                sp++;
+              }
+              else {
+                goto loop_break;
+              }
+              break;
+            case ANY_CHAR:
+              if (str[sp] > 0) {
+                pp++;
+                sp++;
+              }
+              else
+                goto loop_break;
+              break;
+            case SPLIT:
+              threads.push(Thread{pp+2,sp}); // Next thread to run if this doesn't match
+              pp = code[pp+1];
+              break;
+            case JUMP:
+              pp = code[pp+1];
+              break;
+          }
+        }
+        if (sp >= str.size() && pp >= code.size()) return true;
+        else goto loop_break;
+      }
+      return false;
+    }
+  };
 }
