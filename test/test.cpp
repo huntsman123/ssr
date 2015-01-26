@@ -89,4 +89,10 @@ TEST("'\\w' should not match 'a'",
 TEST("'\\w*' should match '      '",
     [] { return match("\\w*", "     "); });
 
+// Make sure you can escape the required characters
+TEST("''\\\\' should match '\\",
+    [] { return match("\\\\", "\\"); });
+TEST("'\\*' should match '*'",
+    [] { return match("\\*", "*"); });
+
 END_TEST();
