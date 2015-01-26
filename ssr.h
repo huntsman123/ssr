@@ -7,6 +7,7 @@ namespace ssr {
   enum {
     CHAR,
     ANY_CHAR,
+    WHITESPACE,
     SPLIT,
     JUMP
   };
@@ -43,6 +44,18 @@ namespace ssr {
           code.push_back(last_instruction);
           last_instruction = code.size() - 2;
         }
+        else if (regex[counter] == '\\') {
+          counter++;
+          if (regex[counter] == 'w') {
+            code.push_back(WHITESPACE);
+            last_instruction = code.size() - 1;
+          }
+          else {
+            code.push_back(CHAR);
+            code.push_back(regex[counter]);
+            last_instruction = code.size() - 2;
+          }
+        }
         else {
           code.push_back(CHAR);
           code.push_back(regex[counter]);
@@ -61,7 +74,7 @@ namespace ssr {
       threads.push(Thread{pp,sp});
 
       // Loop through each thread to find a match
-loop_break: // Ugh, I know
+    loop_break: // Ugh, I know
       while (threads.size() > 0) {
         sp = threads.front().sp;
         pp = threads.front().pp;
@@ -82,6 +95,14 @@ loop_break: // Ugh, I know
               break;
             case ANY_CHAR:
               if (str[sp] > 0) {
+                pp++;
+                sp++;
+              }
+              else
+                goto loop_break;
+              break;
+            case WHITESPACE:
+              if (str[sp] == ' ' || str[sp] == '\t') {
                 pp++;
                 sp++;
               }
