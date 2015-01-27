@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <iostream>
 
 namespace ssr {
@@ -9,7 +10,8 @@ namespace ssr {
     ANY_CHAR,
     WHITESPACE,
     SPLIT,
-    JUMP
+    JUMP,
+    SAVE
   };
 
   struct Thread {
@@ -18,8 +20,10 @@ namespace ssr {
   };
 
   class Regex {
-    std::vector<unsigned int> code; // Where the bytecode is stored
-    std::queue<Thread> threads;    // Keep track of the threads to run
+    std::vector<unsigned int> code;      // Where the bytecode is stored
+    std::queue<Thread> threads;          // Keep track of the threads to run
+    std::vector<std::string> submatches; // Private variable where submatches are stored
+    unsigned int num_submatches = 0;
 
     public:
     
@@ -56,6 +60,11 @@ namespace ssr {
             last_instruction = code.size() - 2;
           }
         }
+        else if (regex[counter] == '(' || regex[counter] == ')') {
+          code.push_back(SAVE);
+          code.push_back(num_submatches++);
+          last_instruction = code.size() - 2;
+        }
         else {
           code.push_back(CHAR);
           code.push_back(regex[counter]);
@@ -72,6 +81,7 @@ namespace ssr {
       unsigned int sp = 0,
                    pp = 0;
       threads.push(Thread{pp,sp});
+      std::vector<unsigned int> match_counter(num_submatches);
 
       // Loop through each thread to find a match
     loop_break: // Ugh, I know
@@ -79,6 +89,7 @@ namespace ssr {
         sp = threads.front().sp;
         pp = threads.front().pp;
         threads.pop();
+
 
         // While there are characters to test
         while (pp < code.size() && sp <= str.size()) {
@@ -116,12 +127,25 @@ namespace ssr {
             case JUMP:
               pp = code[pp+1];
               break;
+            case SAVE:
+              match_counter[code[++pp]] = sp;
+              pp++;
+              break;
           }
         }
-        if (sp >= str.size() && pp >= code.size()) return true;
+        if (sp >= str.size() && pp >= code.size()) {
+          for (unsigned int c = 0; c < match_counter.size(); c+=2) {
+            submatches.push_back(str.substr(match_counter[c], match_counter[c+1] - match_counter[c]));
+          }
+          return true;
+        }
         else goto loop_break;
       }
       return false;
+    }
+
+    const std::vector<std::string>& matches() {
+      return submatches;
     }
   };
 }

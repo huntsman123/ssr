@@ -95,4 +95,13 @@ TEST("''\\\\' should match '\\",
 TEST("'\\*' should match '*'",
     [] { return match("\\*", "*"); });
 
+// Test submatching
+TEST("'aa(b+)123' should match aabbb123 and return 'bbb' for the submatch",
+    [] { Regex regex("aa(b+)123"); regex.match("aabbb123"); return regex.matches()[0] == "bbb"; });
+TEST("'Hello (.*)!' should match 'Hello Ryan!' and return 'Ryan' for the submatch",
+    [] { Regex regex("Hello (.*)!"); regex.match("Hello Ryan!"); return regex.matches()[0] == "Ryan"; });
+TEST("'(Hello) (a*)!' should match 'Hello Bob!' and return 'Hello' and '' submatches",
+    [] { Regex regex("(Hello) Bob(a*)!"); regex.match("Hello Bob!");
+    return regex.matches()[0] == "Hello" && regex.matches()[1] == ""; });
+
 END_TEST();
