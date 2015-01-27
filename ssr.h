@@ -50,7 +50,7 @@ namespace ssr {
         }
         else if (regex[counter] == '\\') {
           counter++;
-          if (regex[counter] == 'w') {
+          if (regex[counter] == 's') {
             code.push_back(WHITESPACE);
             last_instruction = code.size() - 1;
           }

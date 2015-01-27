@@ -79,15 +79,15 @@ TEST("'ba*b' should match 'baaaab'",
 TEST("'.*ba+c' should match 'df9dfjdbaaac'",
     [] { return match(".*ba+c", "df9dfjdbaaac"); });
 
-// Match special character \w
-TEST("'\\w' should match ' '",
-    [] { return match("\\w", " "); });
-TEST("'\\w' should match '\\t'",
-    [] { return match("\\w", "\t"); });
-TEST("'\\w' should not match 'a'",
-    [] { return !match("\\w", "a"); });
-TEST("'\\w*' should match '      '",
-    [] { return match("\\w*", "     "); });
+// Match special character \s
+TEST("'\\s' should match ' '",
+    [] { return match("\\s", " "); });
+TEST("'\\s' should match '\\t'",
+    [] { return match("\\s", "\t"); });
+TEST("'\\s' should not match 'a'",
+    [] { return !match("\\s", "a"); });
+TEST("'\\s*' should match '      '",
+    [] { return match("\\s*", "     "); });
 
 // Make sure you can escape the required characters
 TEST("''\\\\' should match '\\",
