@@ -51,3 +51,7 @@ int main() {
 ## License
 
 This is free to use in the public domain. While obviously not required, credit at least would be appreciated. Or just drop me a line so that I know someone cares. ;-)
+
+## Release History
+
+**01/27/2015** `1.0` Initial release. Support for `.`, `*`, `+`, `\d`, `\w`, `\s`, submatches using `()`.
