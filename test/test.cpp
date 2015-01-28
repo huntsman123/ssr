@@ -89,6 +89,14 @@ TEST("'\\s' should not match 'a'",
 TEST("'\\s*' should match '      '",
     [] { return match("\\s*", "     "); });
 
+// Match special character \d
+TEST("'\\d' should match '9'",
+    [] { return match("\\d", "9"); });
+TEST("'\\d+' should match '0123459876'",
+    [] { return match("\\d+", "0123459876"); });
+TEST("'\\d' should not match 'a'",
+    [] { return !match("\\d", "a"); });
+
 // Make sure you can escape the required characters
 TEST("''\\\\' should match '\\",
     [] { return match("\\\\", "\\"); });
