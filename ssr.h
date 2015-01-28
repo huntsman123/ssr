@@ -9,6 +9,7 @@ namespace ssr {
     CHAR,
     ANY_CHAR,
     WHITESPACE,
+    DIGIT,
     SPLIT,
     JUMP,
     SAVE
@@ -52,6 +53,10 @@ namespace ssr {
           counter++;
           if (regex[counter] == 's') {
             code.push_back(WHITESPACE);
+            last_instruction = code.size() - 1;
+          }
+          else if (regex[counter] == 'd') {
+            code.push_back(DIGIT);
             last_instruction = code.size() - 1;
           }
           else {
@@ -114,6 +119,14 @@ namespace ssr {
               break;
             case WHITESPACE:
               if (str[sp] == ' ' || str[sp] == '\t') {
+                pp++;
+                sp++;
+              }
+              else
+                goto loop_break;
+              break;
+            case DIGIT:
+              if (str[sp] >= '0' && str[sp] <= '9') {
                 pp++;
                 sp++;
               }
