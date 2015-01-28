@@ -97,6 +97,12 @@ TEST("'\\d+' should match '0123459876'",
 TEST("'\\d' should not match 'a'",
     [] { return !match("\\d", "a"); });
 
+// Match special character \w
+TEST("'\\w+' should match '324jdkfmv3345f__343'",
+    [] { return match("\\w+", "324jdkfmv3345f__343"); });
+TEST("'\\w' should not match '&'",
+    [] { return !match("\\w", "&"); });
+
 // Make sure you can escape the required characters
 TEST("''\\\\' should match '\\",
     [] { return match("\\\\", "\\"); });
