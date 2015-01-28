@@ -10,6 +10,7 @@ namespace ssr {
     ANY_CHAR,
     WHITESPACE,
     DIGIT,
+    WORD_CHAR,
     SPLIT,
     JUMP,
     SAVE
@@ -57,6 +58,10 @@ namespace ssr {
           }
           else if (regex[counter] == 'd') {
             code.push_back(DIGIT);
+            last_instruction = code.size() - 1;
+          }
+          else if (regex[counter] == 'w') {
+            code.push_back(WORD_CHAR);
             last_instruction = code.size() - 1;
           }
           else {
@@ -127,6 +132,17 @@ namespace ssr {
               break;
             case DIGIT:
               if (str[sp] >= '0' && str[sp] <= '9') {
+                pp++;
+                sp++;
+              }
+              else
+                goto loop_break;
+              break;
+            case WORD_CHAR:
+              if (( str[sp] >= '0' && str[sp] <= '9' ) ||
+                  ( str[sp] >= 'A' && str[sp] <= 'Z') ||
+                  ( str[sp] >= 'a' && str[sp] <= 'z') ||
+                  ( str[sp] == '_')) {
                 pp++;
                 sp++;
               }
