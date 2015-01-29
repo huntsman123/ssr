@@ -45,7 +45,7 @@ int main() {
 * `\d` Special escape sequence that matches any digit.
 * `\w` Special escape sequence that matches any digit, letter or underscore.
 * `\s` will match against whitespace (space and tab characters).
-* Generic escape sequences, like '\(', to allow you to use special characters.
+* Generic escape sequences, like '\\(', to allow you to use special characters.
 * You can return get submatches within the string by surrounding them in parenthese. I.E., `(\d+)abc` matched against `1234abc` will return the submatch `1234`.
 
 ## License
