@@ -118,4 +118,14 @@ TEST("'(Hello) (a*)!' should match 'Hello Bob!' and return 'Hello' and '' submat
     [] { Regex regex("(Hello) Bob(a*)!"); regex.match("Hello Bob!");
     return regex.matches()[0] == "Hello" && regex.matches()[1] == ""; });
 
+// Test character classes
+TEST("'[abc]+' should match 'abca'",
+    [] { return match("[abc]+", "abca"); });
+TEST("'[abc]+' should not match 'abcz'",
+    [] { return !match("[abc]+", "abcz"); });
+TEST("'[A-Z]' should match 'F'",
+    [] { return match("[A-Z]", "F"); });
+TEST("'[A-F]' should not match 'Z'",
+    [] { return !match("[A-F]", "Z"); });
+
 END_TEST();
