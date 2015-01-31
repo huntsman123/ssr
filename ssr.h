@@ -3,10 +3,11 @@
  * Super Simple Regex
  * by Ryan Breen
  * Initial Release: January 27, 2015
- * Current Version: 1.0
+ * Current Version: 1.1
  * Website: https://github.com/rufusroflpunch/ssr
  * 
  * Release History:
+ * 01/31/2015 - Version 1.1
  * 01/27/2015 - Version 1.0
  *
  */
