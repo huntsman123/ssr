@@ -54,5 +54,5 @@ This is free to use in the public domain. While obviously not required, credit a
 
 ## Release History
 
-**01/31/2015** `1.1` Support for character classes, i.e. [A-Z123]
+**01/31/2015** `1.1` Support for character classes, i.e. [A-Z123]  
 **01/27/2015** `1.0` Initial release. Support for `.`, `*`, `+`, `\d`, `\w`, `\s`, submatches using `()`.
