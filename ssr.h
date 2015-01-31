@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <iostream>
 
 namespace ssr {
   enum {
@@ -22,6 +23,7 @@ namespace ssr {
     WHITESPACE,
     DIGIT,
     WORD_CHAR,
+    CHAR_CLASS,
     SPLIT,
     JUMP,
     SAVE
@@ -85,6 +87,35 @@ namespace ssr {
           code.push_back(SAVE);
           code.push_back(num_submatches++);
           last_instruction = code.size() - 2;
+        }
+        else if (regex[counter] == '[') {
+          code.push_back(CHAR_CLASS);
+          last_instruction = code.size() - 1;
+
+          std::vector<char> chars; // This will temporarily store the chars in the class
+
+          char current = regex[++counter];
+
+          while (current != ']') {
+            if (current == '\\') {
+              current = regex[++counter];
+              chars.push_back(current);
+            }
+            else if (current == '-') {
+              char start = regex[counter - 1] + 1,
+                   end = regex[++counter];
+              while (start <= end)
+                chars.push_back(start++);
+            }
+            else {
+              chars.push_back(current);
+            }
+
+            current = regex[++counter];
+          }
+
+          code.push_back(code.size() + chars.size() + 1); // The instruction after the char class
+          for (auto c : chars) code.push_back(c);
         }
         else {
           code.push_back(CHAR);
@@ -160,6 +191,28 @@ namespace ssr {
               else
                 goto loop_break;
               break;
+            case CHAR_CLASS:
+              {
+                unsigned int next_ins = code[++pp];
+                bool match_class = false;
+
+                pp++;
+                while (pp < next_ins) {
+                  if (code[pp] == str[sp]) {
+                    match_class = true;
+                    break;
+                  }
+                  pp++;
+                }
+
+                if (match_class) {
+                  pp = next_ins;
+                  sp++;
+                }
+                else
+                  goto loop_break;
+                break;
+              }
             case SPLIT:
               threads.push(Thread{pp+2,sp}); // Next thread to run if this doesn't match
               pp = code[pp+1];
